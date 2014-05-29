@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>Artifice</title>
+	<meta name="description" content="Artifice is a Woodlawn-based organization where students who would like to learn science, technology, engineering, and math.">
+	<meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="initial-scale = 1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<link rel="stylesheet" href="style.css">
+	<script src="js/modernizr.min.js"></script>
+   <style>
+
+path.link {
+  fill: none;
+  stroke: #666;
+  stroke-width: 1.5px;
+}
+
+rect {
+  fill: #ccc;
+  stroke: #1c4c54;
+  stroke-width: 1.5px;
+}
+
+text {
+  fill: #000;
+  font: 10px sans-serif;
+  pointer-events: none;
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+	<div class="color">
+	<header>
+		<div class="center">
+			<div class="row">
+					<div class="fg12">
+						<h1><a href="/">@rtifice</a></h1>
+						<a href="#"><span class="icon-menu"></span></a>
+					<div class="nav">
+						<ul>
+							<li><a href="about-us.html">About Us</a></li>
+							<li><a href="sign-up.html">Sign Up</a></li>
+							<li><a href="contact.html">Contact</a></li>
+						</ul>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+					<div class="clearfix"></div>
+			</div>
+		</div>
+	</header>
+
+<section class="hero">
+		<div class="center">
+			<div class="row">
+				<div class="fg12">
+					<h1>Buildables</h1>
+					<a href="#" class="button">BristleBot</a>
+					<a href="#" class="button">Sunfollower</a>
+					<a href="#" class="button">Music Lightshow</a>
+					<a href="#" class="button">Solar Power</a>
+					<a href="#" class="button">Video Game</a>
+					<a href="#" class="button">Project Website</a>
+				</div>
+			</div>
+		</div>
+	</section>
+	</div>
+</div>
+
+<section class="about">
+        <div class="center">
+                <div class="row">
+                        <div class="fg12">
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+// get the data
+d3.csv("force.csv", function(error, links) {
+
+var nodes = {};
+
+
+// Compute the distinct nodes from the links.
+links.forEach(function(link) {
+    link.source = nodes[link.source] || 
+        (nodes[link.source] = {name: link.source, depth: +link.value, xcoord: +link.xcoord});
+    link.target = nodes[link.target] || 
+        (nodes[link.target] = {name: link.target, depth: +link.value+1, xcoord: +link.xcoord});
+    link.value = +link.value;
+});
+
+var width = 960,
+    height = 500;
+
+var force = d3.layout.force()
+    .nodes(d3.values(nodes))
+    .links(links)
+    .size([width, height])
+    .linkDistance(function(d){
+    var spac = 60*Math.pow(2,4-d.value-1);
+    return Math.sqrt(spac*spac+80*80);
+    })
+    .linkStrength(function(d){
+    if(d.value>3||d.value<1){return 0.05;}
+    return 1;
+    })
+    .charge(function(d){
+    if(d.value>3||d.value<1){return 0.1;}
+    return -600;
+    })
+
+    .gravity(0.05)
+    .on("tick", tick)
+    .start();
+
+
+
+var svg = d3.select(".hero").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+// build the arrow.
+svg.append("svg:defs").selectAll("marker")
+    .data(["end"])      // Different link/path types can be defined here
+  .enter().append("svg:marker")    // This section adds in the arrows
+    .attr("id", String)
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 8)
+    .attr("refY", -0.5)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("orient", "auto")
+  .append("svg:path")
+    .attr("d", "M0,-5L10,0L0,5");
+
+// add the links and the arrows
+var path = svg.append("svg:g").selectAll("path")
+    .data(force.links())
+  .enter().append("svg:path")
+//    .attr("class", function(d) { return "link " + d.type; })
+    .attr("class", "link");
+    
+// define the nodes
+var node = svg.selectAll(".node")
+    .data(force.nodes())
+  .enter().append("g")
+    .attr("class", "node")
+                    
+// add the nodes
+node.append("rect")
+    .attr("width", function(d) { return 6*d.name.length; })
+    .attr("x", function(d) { return -3*d.name.length; })
+    .attr("height", 25)
+    .attr("rx", 4)
+    .attr("ry", 4)
+    .on("mouseover", mouseoverme)
+    .on("mouseout", mouseoutme);
+    
+
+// add the text 
+node.append("text")
+    .attr("x", function(d) { return -3*d.name.length; })
+    .attr("dx", "0.5em")
+    .attr("dy", "1.5em")
+    .text(function(d) { return d.name; });
+
+force.nodes().forEach(function(d) {
+    d.x = d.px = d.xcoord*60 + 960/2;
+  });
+  
+  
+  
+function recurse(d){
+    d.active = 1;
+    force.links().forEach(function (l){
+        if(l.target===d){
+            recurse(l.source);
+        }
+    });
+}
+
+function unrecurse(q){
+    q.active = 0;
+    force.links().forEach(function (l){
+        if(l.target===q){
+            unrecurse(l.source);
+        }
+    });
+}
+          
+function mouseoverme(d) {
+    d.active = 1;
+    force.links().forEach(function (l){
+        if(l.target===d){
+            recurse(l.source);
+        }
+    });
+    
+    path.transition()
+        .duration(300)
+        .style('stroke-width', function(l) {
+        if (l.target.active==1){
+            return 4;
+        }
+        else {
+            return 2;
+        }
+    })
+    .style('stroke', function(l) {
+        if (l.target.active==1){
+            return "#F00";
+        }
+        else {
+            return "#666";
+        }
+    });
+    
+    node.selectAll("rect").transition()
+        .duration(300)
+		.attr("width", function(n) { if(n.active){return 8*n.name.length; } else{return 6*n.name.length;}})
+		.attr("x", function(n) { if(n.active){return -4*n.name.length; } else{return -3*n.name.length;}})
+		.attr("height", function(n) { if(n.active) {return 35;} else{return 25;}})
+        .attr("y", function(n) { if(n.active) {return -5;} else{return 0;}})
+        .style("stroke", function(n) { if(n.active) {return "#F00";} else{return "#1c4c54";}});
+    node.selectAll("text").transition()
+        .duration(300)
+        .style("font", function(n) { if(n.active) {return "12px sans-serif";} else{return "10px sans-serif";}});
+		
+        
+}
+
+function mouseoutme(d) {
+    d.active=0;
+    force.links().forEach(function (l){
+        if(l.target===d){
+            unrecurse(l.source);
+        }
+    });
+    path.transition()
+        .duration(300)
+        .style('stroke-width', function(l) {
+        if (l.target.active==1){
+            return 4;
+        }
+        else {
+            return 2;
+        }
+    })
+    .style('stroke', function(l) {
+        if (l.target.active==1){
+            return "#F00";
+        }
+        else {
+            return "#666";
+        }
+    });
+    
+    node.selectAll("rect").transition()
+        .duration(300)
+		.attr("width", function(n) { if(n.active){return 8*n.name.length; } else{return 6*n.name.length;}})
+		.attr("x", function(n) { if(n.active){return -4*n.name.length; } else{return -3*n.name.length;}})
+		.attr("height", function(n) { if(n.active) {return 35;} else{return 25;}})
+        .attr("y", function(n) { if(n.active) {return -5;} else{return 0;}})
+        .style("stroke", function(n) { if(n.active) {return "#F00";} else{return "#1c4c54";}});
+    node.selectAll("text").transition()
+        .duration(300)
+        .style("font", function(n) { if(n.active) {return "12px sans-serif";} else{return "10px sans-serif";}});
+	    
+     
+}
+
+// add the curvy lines
+function tick() {
+
+  force.nodes().forEach(function(d) {
+    d.y = d.py = d.depth*80+40;
+  });
+  
+    path.attr("d", function(d) {
+        var dx = d.target.x - d.source.x,
+            dy = d.target.y - d.source.y,
+            dr = Math.sqrt(dx * dx + dy * dy);
+        if(d.target.x>d.source.x){
+        return "M" + 
+            (d.source.x) + "," + 
+            (d.source.y+25) + "A" + 
+            dr + "," + dr + " 0 0,1 " + 
+            d.target.x + "," + 
+            d.target.y;
+        }else{
+        return "M" + 
+            (d.source.x) + "," + 
+            (d.source.y+25) + "A" + 
+            dr + "," + dr + " 0 0,0 " + 
+            d.target.x + "," + 
+            d.target.y;
+        }
+    });
+
+    node
+        .attr("transform", function(d) { 
+  	    return "translate(" + d.x + "," + d.y + ")"; });
+}
+
+});
+
+</script>
+
+                        </div>
+                </div>
+        </div>
+</section>
+
+
+<section class="mission">
+	<div class="center">
+		<div class="row">
+
+		</div>
+	</div>
+</section>
+
+<footer>
+	<div class="center">
+		<div class="row">
+			<div class="fg8 nav">
+				<ul>
+					<li><a href="about-us.html">About Us</a></li>
+							<li><a href="sign-up.html">Sign Up</a></li>
+							<li><a href="contact.html">Contact</a></li>
+				</ul>
+			</div>
+			<div class="fg4">
+				<p>Copyright ©2013 Artifice NFP, All rights reserved</p>
+			</div>
+			<div class="clearfix"></div>
+		</div>
+	</div>
+</footer>
+
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="js/scripts.js"></script>
+</body>
+</html>
+</html>

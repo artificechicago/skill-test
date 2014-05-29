@@ -1,0 +1,23 @@
+source,target,value,xcoord
+Start Here,Beginner Bootcamp,0,0
+Beginner Bootcamp,Electronics,1,-1
+Beginner Bootcamp,Programming,1,1
+Electronics,Analog Electronics,2,-3
+Electronics,Digital Electronics,2,-1
+Programming,Software Programming,2,1
+Programming,Web Programming,2,3
+Analog Electronics,Energy Systems,3,-4
+Analog Electronics,Sensors and Signals,3,-3
+Digital Electronics,Input Processing,3,-2
+Digital Electronics,Output Control,3,-1
+Software Programming,Core Programming,3,1
+Software Programming,Mobile Development,3,2
+Web Programming,Python and GAE,3,3
+Web Programming,Node.js,3,4
+Input Processing,Robotics,4,-2
+Output Control,Robotics,4,-2
+Core Programming,Robotics,4,-2
+Input Processing,Solar Farm,4,-4
+Output Control,Solar Farm,4,-4
+Energy Systems,Solar Farm,4,-4
+Sensors and Signals,Solar Farm,4,-4
